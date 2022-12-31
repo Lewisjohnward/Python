@@ -17,6 +17,12 @@ def Sound(sound):
     duration = player.get_length() / 1000
     time.sleep(duration)
 
+# Check that a filename is given to play
+if len(sys.argv) != 2:
+    print("Incorrect usage: python3 playmp3.py <FILENAME>")
+    exit()
+else:
 # Play audio from file given as command line arg
-Sound(sys.argv[1])
+    Sound(sys.argv[1])
+
 
