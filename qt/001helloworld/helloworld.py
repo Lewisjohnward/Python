@@ -1,3 +1,7 @@
+"""
+Simple hello world example with PyQt5
+"""
+
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel
 
 # For accessing command line args
