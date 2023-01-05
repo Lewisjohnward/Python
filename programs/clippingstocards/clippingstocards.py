@@ -17,6 +17,7 @@ except IOError:
     print(f'Unable to open {filename} are you sure the program is being called in the same directory')
     exit()
 
+# split the clippings by newlines
 clippings = re.split("\n", clippings)
 
 cards = open("cards.txt", "w")
