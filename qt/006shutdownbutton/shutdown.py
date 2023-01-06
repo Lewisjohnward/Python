@@ -1,5 +1,5 @@
 """
-    A dialogue button with a button that when pressed shutsdown system
+    GUI with buttons to shutdown/restart system
 """
 
 import sys
@@ -7,7 +7,6 @@ import os
 
 from PyQt5.QtWidgets import (
         QApplication,
-        QDialog,
         QLabel,
         QPushButton,
         QVBoxLayout,
@@ -18,15 +17,23 @@ from PyQt5.QtWidgets import (
 def shutdown():
     os.system("shutdown now")
 
+def restart():
+    os.system("shutdown -r now")
+
 app = QApplication([])
 window = QWidget()
 window.setWindowTitle("Shutdown System")
 layout = QVBoxLayout()
 
-button = QPushButton("Shutdown")
-button.clicked.connect(shutdown)
+button_shutdown = QPushButton("Shutdown")
+button_shutdown.clicked.connect(shutdown)
 
-layout.addWidget(button)
+button_restart = QPushButton("Restart")
+button_restart.clicked.connect(restart)
+
+layout.addWidget(button_shutdown)
+layout.addWidget(button_restart)
+
 msgLabel = QLabel("")
 layout.addWidget(msgLabel)
 window.setLayout(layout)
