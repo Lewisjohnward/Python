@@ -21,7 +21,6 @@ class Example(QWidget):
         self.initUI()
         
     def initUI(self):      
-        
         layout = QHBoxLayout()
         self.key_label = QLabel("?")
         self.key_label.setAlignment(QtCore.Qt.AlignCenter)
