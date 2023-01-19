@@ -37,7 +37,6 @@ class Canvas(QLabel):
         self.pen_color = QColor(c)
 
     def mouseMoveEvent(self, e):
-        print(e.pos().x(), e.pos().y())
         x = e.pos().x()
         y = e.pos().y() + 400
 
@@ -93,7 +92,7 @@ class MainWindow(QMainWindow):
             b.pressed.connect(lambda c=c: self.canvas.set_pen_color(c))
             layout.addWidget(b)
         spray_button = QPushButton()
-        spray_button.setIcon(QIcon("./security-system.png"))
+        spray_button.setIcon(QIcon("./icons/spray.png"))
         spray_button.setFixedSize(QSize(24, 24))
         layout.addWidget(spray_button)
 
