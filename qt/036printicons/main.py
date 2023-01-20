@@ -12,6 +12,7 @@ class Window(QWidget):
         super(Window, self).__init__()
 
         icons = sorted([attr for attr in dir(QStyle) if attr.startswith("SP_")])
+        print(dir(QStyle))
         layout = QGridLayout()
 
         for n, name in enumerate(icons):

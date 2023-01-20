@@ -20,8 +20,6 @@ class QPaletteButton(QPushButton):
         super().__init__()
         self.setFixedSize(QSize(24,24))
         self.setStyleSheet("background-color: %s;" % color)
-        
-
 
 class Canvas(QLabel):
     def __init__(self):
