@@ -98,26 +98,32 @@ class Table(QTableView):
         # set column width to fit contents (set font first!)
         # enable sorting
     def handle_click(self, item):
-        column = item.row()
-        self.editor.change_clipping(data_list[column][0], data_list[column][1])
-        #self.editor.change_clipping(data_list[column][0], data_list[column][1])
+        row = item.row()
+        self.editor.change_clipping(data_list[row][0], data_list[row][1])
+        self.selected_row = row
+        print(self.selected_row)
 
 
 class MyWindow(QMainWindow):
     def __init__(self, data_list, header, *args):
         super().__init__()
 
-
+        # Menu bar
         exitAction = QAction(QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
-    
-
         self.statusBar()
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAction)
+
+        # Toolbar
+        deleteEntryAction = QAction(QIcon("./icons/table-delete-row.png"), '&Delete', self)
+        deleteEntryAction.triggered.connect(self.handleDelete)
+        self.toolbar = self.addToolBar('Delete')
+        self.toolbar.addAction(deleteEntryAction)
+        self.toolbar.setMovable(False)
 
 
 
@@ -131,6 +137,10 @@ class MyWindow(QMainWindow):
         w = QWidget()
         w.setLayout(layout)
         self.setCentralWidget(w)
+
+
+    def handleDelete(self):
+        print("delete row")
 
 
 
