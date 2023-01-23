@@ -12,17 +12,23 @@ import getpass
 
 
 class Editor(QWidget):
-    def __init__(self):
+    def __init__(self, title, text):
         super().__init__()
 
+        # Title edit
         label_title = QLabel("Title")
         label_title.setStyleSheet("font-size: 20px;")
-        self.title = QLineEdit("Title edit")
+        self.title = QLineEdit(title)
+        self.title.textChanged.connect(self.title_changed)
         self.title.setStyleSheet("font-size: 15px;")
+
+        # Text edit
         label_text = QLabel("Text")
         label_text.setStyleSheet("font-size: 20px;")
-        self.text = QTextEdit("Text edit")
+        self.text = QTextEdit(text)
+        self.text.textChanged.connect(self.text_changed)
         self.text.setStyleSheet("font-size: 15px;")
+
         l = QVBoxLayout()
         l.addWidget(label_title)
         l.addWidget(self.title)
@@ -34,6 +40,12 @@ class Editor(QWidget):
         h.addWidget(save_btn)
         l.addLayout(h)
         self.setLayout(l)
+
+    def title_changed(self):
+        print(self.title.text())
+
+    def text_changed(self):
+        print(self.text.toPlainText())
 
     def change_clipping(self, title, text):
         self.title.setText(title)
@@ -78,35 +90,60 @@ class MyTableModel(QAbstractTableModel):
                 return str(value)
 
     def setData(self, index, value, role):
-        print(index.row(), index.column(), value, role)
         if role == Qt.EditRole:
             self.mylist[index.row()][index.column()] = value
             return True
 
 
 class Table(QTableView):
-    def __init__(self, data_list, header, editor):
+    def __init__(self, data_list, header, editor, undo):
         super().__init__()
+        self.selected_row = 0
         self.editor = editor
+        self.undo = undo
+
+        self.deleted_rows = []
+
+        self.draw_table()
+
+    def draw_table(self):
         table_model = MyTableModel(self, data_list, header)
         self.setModel(table_model)
         self.clicked.connect(self.handle_click)
         self.resizeColumnsToContents()
         self.setSortingEnabled(False)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.selectRow(self.selected_row)
+        self.editor.change_clipping(data_list[0][0], data_list[0][1])
 
-        #table_view.setFont(font)
-        # set column width to fit contents (set font first!)
-        # enable sorting
+
     def handle_click(self, item):
         row = item.row()
-        self.editor.change_clipping(data_list[row][0], data_list[row][1])
         self.selected_row = row
-        print(self.selected_row)
+        self.editor.change_clipping(data_list[row][0], data_list[row][1])
+
+    def delete_selected_row(self):
+        self.deleted_rows.insert(0, [data_list[self.selected_row][0], data_list[self.selected_row][1]])
+        if len(self.deleted_rows):
+            self.undo.setEnabled(True)
+
+        data_list.pop(self.selected_row)
+        self.draw_table()
+
+    def undo_delete(self):
+        data_list.insert(0, [self.deleted_rows[0][0], self.deleted_rows[0][1]])
+        self.deleted_rows.pop(0)
+        if not len(self.deleted_rows):
+            self.undo.setDisabled(True)
+        self.draw_table()
+
 
 
 class MyWindow(QMainWindow):
     def __init__(self, data_list, header, *args):
         super().__init__()
+
 
         # Menu bar
         exitAction = QAction(QIcon('exit.png'), '&Exit', self)
@@ -121,18 +158,31 @@ class MyWindow(QMainWindow):
         # Toolbar
         deleteEntryAction = QAction(QIcon("./icons/table-delete-row.png"), '&Delete', self)
         deleteEntryAction.triggered.connect(self.handleDelete)
+        self.undoDeleteAction = QAction(QIcon("./icons/arrow-circle-225.png"), '&Undo', self)
+        self.undoDeleteAction.setEnabled(False)
+        self.undoDeleteAction.triggered.connect(self.handleUndo)
+        self.redoDeleteAction = QAction(QIcon("./icons/arrow-circle-225-left.png"), '&Redo', self)
+        self.redoDeleteAction.setEnabled(False)
+        self.redoDeleteAction.triggered.connect(self.handle_redo)
+
+
         self.toolbar = self.addToolBar('Delete')
         self.toolbar.addAction(deleteEntryAction)
         self.toolbar.setMovable(False)
+        self.toolbar = self.addToolBar('Undo')
+        self.toolbar.addAction(self.undoDeleteAction)
+        self.toolbar.setMovable(False)
+        self.toolbar = self.addToolBar('Redo')
+        self.toolbar.addAction(self.redoDeleteAction)
 
 
+        # Editor
+        self.editor = Editor(data_list[0][0], data_list[0][1])
+        # Table
+        self.table = Table(data_list, header, self.editor, self.undoDeleteAction)
 
-
-
-        self.editor = Editor()
-        table = Table(data_list, header, self.editor)
         layout = QVBoxLayout()
-        layout.addWidget(table)
+        layout.addWidget(self.table)
         layout.addWidget(self.editor)
         w = QWidget()
         w.setLayout(layout)
@@ -140,7 +190,13 @@ class MyWindow(QMainWindow):
 
 
     def handleDelete(self):
-        print("delete row")
+        self.table.delete_selected_row()
+
+    def handleUndo(self):
+        self.table.undo_delete()
+
+    def handle_redo(self):
+        pass
 
 
 
