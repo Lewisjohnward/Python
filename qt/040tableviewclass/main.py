@@ -120,6 +120,7 @@ class Table(QTableView):
 
     def handle_click(self, item):
         row = item.row()
+        print(row)
         self.selected_row = row
         self.editor.change_clipping(data_list[row][0], data_list[row][1])
 
@@ -136,6 +137,7 @@ class Table(QTableView):
         self.deleted_rows.pop(0)
         if not len(self.deleted_rows):
             self.undo.setDisabled(True)
+            self.redo.setEnabled(True)
         self.draw_table()
 
 
@@ -158,12 +160,20 @@ class MyWindow(QMainWindow):
         # Toolbar
         deleteEntryAction = QAction(QIcon("./icons/table-delete-row.png"), '&Delete', self)
         deleteEntryAction.triggered.connect(self.handleDelete)
+
+        # Undo
         self.undoDeleteAction = QAction(QIcon("./icons/arrow-circle-225.png"), '&Undo', self)
         self.undoDeleteAction.setEnabled(False)
         self.undoDeleteAction.triggered.connect(self.handleUndo)
+
+        # Redo
         self.redoDeleteAction = QAction(QIcon("./icons/arrow-circle-225-left.png"), '&Redo', self)
         self.redoDeleteAction.setEnabled(False)
         self.redoDeleteAction.triggered.connect(self.handle_redo)
+
+        # Save
+        saveAction = QAction(QIcon("./icons/disk.png"), '&Save', self)
+        saveAction.triggered.connect(self.save)
 
 
         self.toolbar = self.addToolBar('Delete')
@@ -172,8 +182,7 @@ class MyWindow(QMainWindow):
         self.toolbar = self.addToolBar('Undo')
         self.toolbar.addAction(self.undoDeleteAction)
         self.toolbar.setMovable(False)
-        self.toolbar = self.addToolBar('Redo')
-        self.toolbar.addAction(self.redoDeleteAction)
+        self.toolbar.addAction(saveAction)
 
 
         # Editor
@@ -196,12 +205,10 @@ class MyWindow(QMainWindow):
         self.table.undo_delete()
 
     def handle_redo(self):
-        pass
+        self.table.redo_delete()
 
-
-
-
-
+    def save(self):
+        print("saving!")
 
 
 # the solvent data ...

@@ -23,3 +23,5 @@ https://www.pythonguis.com/tutorials/creating-your-first-pyqt-window/
 
 [PySide6 Documentation](https://doc.qt.io/qtforpython/index.html)
 
+[A collection of 15 small desktop applications written in Python using PyQt](https://github.com/pythonguis/15-minute-apps)
+
