@@ -1,16 +1,12 @@
 """
     Minesweeper game in a dialog widget
     To do:
+        Add random start
         Reduce number of mines
         Put grid in its own class
         Win game ending
         Add animation to uncovering safe spots
 """
-
-
-
-
-
 
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
@@ -41,7 +37,6 @@ class AnimatedHoverButton(QPushButton):
         self.animateHover = False
 
     def mousePressEvent(self, e):
-        self.start_game()
         if e.button() == Qt.MouseButton.RightButton:
             self.handle_right_click()
         elif e.button() == Qt.MouseButton.LeftButton and self.flag != True:
@@ -66,11 +61,10 @@ class AnimatedHoverButton(QPushButton):
             self.setIcon(QIcon("./icons/nuclear-bomb.png"))
             self.end_game(True)
         else:
-            self.uncovered = True
             self.uncover()
-            self.display_touching()
 
     def uncover(self):
+        self.uncovered = True
 
         btn_list = self.parent().children()
         btn_list = btn_list[1:]
@@ -103,6 +97,7 @@ class AnimatedHoverButton(QPushButton):
                     runcover(btn_list[position_in_arr])
 
         runcover(self)
+        self.display_touching()
 
     def display_touching(self):
         btn_list = self.parent().children()
@@ -151,6 +146,13 @@ class AnimatedHoverButton(QPushButton):
 
     def restart(self):
         print("restart")
+
+    def choose_random_start(self):
+        btn_list = self.parent().children()[1:]
+        safe_areas = list(filter(lambda btn: btn.ismine == False, btn_list))
+        random_btn = random.choice(safe_areas)
+        random_btn.uncover()
+
 
 class Header(QHBoxLayout):
     def __init__(self, restart_game):
@@ -201,8 +203,37 @@ class Header(QHBoxLayout):
         self.flag_count.setText(str(self.remaining_flags))
 
 
+class Grid(QWidget):
+    def __init__(self, update_flags, start_game, end_game):
+        super().__init__()
+        self.update_flags = update_flags
+        self.start_game = start_game
+        self.end_game = end_game
 
-        
+        mines = list() 
+        self.grid = QGridLayout()
+
+        for j in range(10):
+            sublist = list()
+            for i in range(10):
+                sublist.append(random.randint(0, 1))
+            mines.append(sublist)
+            sublist = []
+
+
+        self.grid_count = 10
+
+        for i in range(self.grid_count):
+            for j in range(self.grid_count):
+                self.btn = AnimatedHoverButton(mines[i][j], i, j, self.update_flags, self.start_game, self.end_game, self.grid)
+                self.grid.addWidget(self.btn, i, j, 1, 1)
+
+        self.setLayout(self.grid)
+        self.setStyleSheet("border: 1px solid black;")
+
+    def mousePressEvent(self, e):
+        print("hello")
+        #self.clicked.connect(lambda : print("hello"))
 
 
 class Dialog(QDialog):
@@ -221,35 +252,13 @@ class Dialog(QDialog):
         # Header
         self.header = Header(self.restart_game)
 
-        widget = QWidget()
-        mine_grid = QGridLayout()
-        widget.setLayout(mine_grid)
-        widget.setStyleSheet("border: 1px solid black;")
+        grid = Grid(self.header.update_flags, self.start_game, self.end_game)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.header.increment_counter)
 
-        mines = list() 
-        for j in range(10):
-            sublist = list()
-            for i in range(10):
-                sublist.append(random.randint(0, 1))
-            mines.append(sublist)
-            sublist = []
-
-
-        self.grid = 10
-
-        for i in range(self.grid):
-            for j in range(self.grid):
-                self.btn = AnimatedHoverButton(mines[i][j], i, j, self.header.update_flags, self.start_game, self.end_game, self.grid)
-                mine_grid.addWidget(self.btn, i, j, 1, 1)
-
-
-        
-
         vert_layout.addLayout(self.header)
-        vert_layout.addWidget(widget, 2)
+        vert_layout.addWidget(grid, 2)
 
 
         self.setLayout(vert_layout)
