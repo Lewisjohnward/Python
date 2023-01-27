@@ -16,6 +16,16 @@ import sys
 import os
 import random
 
+uncovered_colors = [
+        "white",
+        "#5f6ecf",
+        "#e6ca4e",
+        "#d4a168",
+        "#b83428",
+        "#8a28b8",
+        "#b8283b"
+        ]
+
 class AnimatedHoverButton(QPushButton):
     def __init__(self, ismine, pos_x, pos_y, update_flags, start_game, end_game, grid_size):
         super().__init__()
@@ -83,7 +93,6 @@ class AnimatedHoverButton(QPushButton):
                 if coord[0] < 0 or coord[1] < 0 or coord[0] > 9 or coord[1] > 9:
                     coords.pop(i)
 
-            btn.setStyleSheet("background: darkgray;")
             btn.uncovered = True
 
 
@@ -104,7 +113,11 @@ class AnimatedHoverButton(QPushButton):
         btn_list = btn_list[1:]
         uncovered_list = filter(lambda btn: btn.uncovered, btn_list)
         for uncovered in uncovered_list:
-            uncovered.setText(self.count_touching_bombs(uncovered))
+            touching = self.count_touching_bombs(uncovered)
+            uncovered.setText(touching)
+            uncovered.set_color(touching)
+
+
 
     def count_touching_bombs(self, uncovered):
         btn_list = self.parent().children()
@@ -152,6 +165,10 @@ class AnimatedHoverButton(QPushButton):
         safe_areas = list(filter(lambda btn: btn.ismine == False, btn_list))
         random_btn = random.choice(safe_areas)
         random_btn.uncover()
+
+    def set_color(self, adjacent):
+        index = int(adjacent)
+        self.setStyleSheet(f"color: {uncovered_colors[index]}; background: darkgray")
 
 
 class Header(QHBoxLayout):
