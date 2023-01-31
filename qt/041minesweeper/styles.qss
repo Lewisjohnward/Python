@@ -38,7 +38,7 @@ QMenuBar{
 }
 
 .btn:hover{
-    background: darkgray;
+    background: #bdbdbd;
 }
 
 .frame{
