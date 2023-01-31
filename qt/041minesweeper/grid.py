@@ -2,76 +2,135 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 
-from header import Header
+from random import randint, shuffle, choice
 
-import sys
-import os
-import random
-
-uncovered_colors = [
-        "white",
-        "#5f6ecf",
-        "#e6ca4e",
-        "#d4a168",
-        "#b83428",
-        "#8a28b8",
-        "#b8283b"
-        ]
-
-class AnimatedHoverButton(QPushButton):
-    def __init__(self, ismine, pos_x, pos_y, update_flags, start_game, end_game, grid_size):
+##### UI ####################
+class AnimatedHoverButtonUI(QPushButton):
+    def __init__(self):
         super().__init__()
         self.initUI()
-        self.ismine = ismine
-        self.flag = False
-        self.update_flags = update_flags
-        self.start_game = start_game
-        self.uncovered = False
-        self.end_game = end_game
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.grid_size = grid_size
 
     def initUI(self):
-        self.setStyleSheet("border-top: 3px solid white; border-right: 4px solid gray; border-bottom: 4px solid gray; border-left: 3px solid white")
+        self.setProperty("class", "btn inverseBorder")
         self.setCursor(QCursor(Qt.PointingHandCursor))
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.animateHover = False
+
+class GridUI(QFrame):
+    def __init__(self, grid_count = 10):
+        super().__init__()
+        self.grid_count = grid_count
+        self.initUI()
+
+    def initUI(self):
+        self.setProperty("class", "frame border")
+        self.grid = QGridLayout()
+        self.grid.setSpacing(0)
+        self.grid.setContentsMargins(0, 0, 0, 0)
+
+        mines = self.generateMines(45)
+
+        for i in range(self.grid_count):
+            for j in range(self.grid_count):
+                self.btn = AnimatedHoverButton(mines[i][j], i, j)
+                self.grid.addWidget(self.btn, i, j, 1, 1)
+
+        self.setLayout(self.grid)
+
+    # Generates the mines grid
+    def generateMines(self, minesToPlace):
+        seedMines = list() 
+        numOfMines = minesToPlace
+        for j in range(10):
+            for i in range(10):
+                if numOfMines > 0:
+                    numOfMines -= 1
+                    seedMines.append(1)
+                else:
+                    seedMines.append(0)
+        shuffle(seedMines)
+        mines = list()
+        for i in range(10):
+            mines.append(seedMines[i * 10: (i + 1) * 10])
+        return mines
+
+####### LOGIC ############################## 
+
+class AnimatedHoverButton(AnimatedHoverButtonUI):
+    def __init__(self, mine, pos_x, pos_y):
+        super().__init__()
+        self.mine = mine
+        self.flag = False
+        self.uncovered = False
+        self.pos_x = pos_x
+        self.pos_y = pos_y
 
     def mousePressEvent(self, e):
-        if e.button() == Qt.MouseButton.RightButton:
-            self.handle_right_click()
-        elif e.button() == Qt.MouseButton.LeftButton and self.flag != True:
-            self.handle_left_click()
-
-    def handle_right_click(self):
-        if self.uncovered:
+        # If game end don't accept clicks
+        if self.parent().game_end or self.uncovered:
             return
+        elif e.button() == Qt.MouseButton.LeftButton and not self.flag:
+            self.click_handle()
+        elif e.button() == Qt.MouseButton.RightButton:
+            self.place_flag()
+
+    def place_flag(self):
         if self.flag:
-            self.setIcon(QIcon(""))
             self.flag = False
-        else:
-            self.flag = True
-            self.setIcon(QIcon("./icons/red-flag.png"))
-        self.update_flags(self.flag)
-    
-
-    def handle_left_click(self):
-        if self.uncovered:
+            self.remove_flag()
+            self.parent().header.flags.increment_flag()
             return
-        if self.ismine:
-            self.setIcon(QIcon("./icons/nuclear-bomb.png"))
-            self.end_game(True)
+        else:
+            self.setIcon(QIcon("./icons/red-flag.png"))
+            self.parent().header.flags.decrement_flag()
+            self.flag = True
+
+    def remove_flag(self):
+            self.setIcon(QIcon(""))
+
+    def click_handle(self):
+        if self.parent().first_selection:
+            self.mine = False
+            self.parent().first_selection = False
+            self.uncover_space()
+            self.parent().parent().parent().start_game()
+        else:
+            self.uncover_space()
+
+    def uncover_space(self):
+        if self.mine:
+            self.parent().parent().parent().restart_game()
         else:
             self.uncover()
 
-    def uncover(self):
+    def refresh_style(self):
+        self.setCursor(QCursor(Qt.ArrowCursor))
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+
+    def mark_uncovered(self):
         self.uncovered = True
+        self.remove_flag()
+        self.setProperty("class", "uncoveredSafe")
+        self.refresh_style()
 
-        btn_list = self.parent().children()
-        btn_list = btn_list[1:]
+    def uncover_end(self):
+        if self.mine:
+            ### END GAME LOGIC HERE
+            self.setProperty("class", "uncoveredBomb")
+            self.refresh_style()
+        else:
+            self.setProperty("class", "uncoveredSafe")
+            self.setText("")
+            self.refresh_style()
 
-        def runcover(btn):
+
+    def uncover(self):
+        self.mark_uncovered()
+        btn_list = self.parent().children()[1:]
+
+        def uncover_adjacent(btn):
+            btn.mark_uncovered()
             x = btn.pos_x
             y = btn.pos_y
 
@@ -80,13 +139,13 @@ class AnimatedHoverButton(QPushButton):
             coords.append([y + 1, x])
             coords.append([y , x + 1])
             coords.append([y , x - 1])
+            tmp = []
 
-            for i,coord in enumerate(coords):
-                if coord[0] < 0 or coord[1] < 0 or coord[0] > 9 or coord[1] > 9:
-                    coords.pop(i)
 
-            btn.uncovered = True
-
+            for i in coords:
+                if i[0] >= 0 and i[0] <= 9 and i[1] >=0 and i[1] <= 9:
+                    tmp.append(i)
+            coords = tmp
 
             for coord in coords:
 
@@ -94,10 +153,10 @@ class AnimatedHoverButton(QPushButton):
                 coord_x = coord[1] * 10
                 position_in_arr = coord_y + coord_x
 
-                if btn_list[position_in_arr].ismine == False and btn_list[position_in_arr].uncovered == False:
-                    runcover(btn_list[position_in_arr])
+                if btn_list[position_in_arr].mine == False and btn_list[position_in_arr].uncovered == False:
+                    uncover_adjacent(btn_list[position_in_arr])
 
-        runcover(self)
+        uncover_adjacent(self)
         self.display_touching()
 
     def display_touching(self):
@@ -109,7 +168,27 @@ class AnimatedHoverButton(QPushButton):
             uncovered.setText(touching)
             uncovered.set_color(touching)
 
+    def set_color(self, touching):
+        colors = [
+                "#0091ff",
+                "#34eb6e",
+                "#bdeb34",
+                "#b037ed",
+                "#ed3737",
+                "#f00a0a",
+                "#fa0505",
+                "#080808"
+                ]
 
+
+        i = 0
+        try:
+            i = int(touching)
+        except ValueError:
+            pass
+        if i == 0:
+            return
+        self.setStyleSheet(f'color: {colors[i - 1]};')
 
     def count_touching_bombs(self, uncovered):
         btn_list = self.parent().children()
@@ -141,7 +220,7 @@ class AnimatedHoverButton(QPushButton):
             coord_x = coord[1] * 10
             position_in_arr = coord_y + coord_x
 
-            if btn_list[position_in_arr].ismine == True:
+            if btn_list[position_in_arr].mine == True:
                 touching += 1
 
         if touching == 0:
@@ -149,48 +228,18 @@ class AnimatedHoverButton(QPushButton):
         else:
             return str(touching)
 
-    def restart(self):
-        print("restart")
-
-    def choose_random_start(self):
-        btn_list = self.parent().children()[1:]
-        safe_areas = list(filter(lambda btn: btn.ismine == False, btn_list))
-        random_btn = random.choice(safe_areas)
-        random_btn.uncover()
-
-    def set_color(self, adjacent):
-        index = int(adjacent)
-        self.setStyleSheet(f"color: {uncovered_colors[index]}; background: darkgray")
-
-
-class Grid(QWidget):
-    def __init__(self, update_flags, start_game, end_game):
+class Grid(GridUI):
+    def __init__(self, header):
         super().__init__()
-        self.update_flags = update_flags
-        self.start_game = start_game
-        self.end_game = end_game
-
-        mines = list() 
-        self.grid = QGridLayout()
-        self.grid.setSpacing(0)
-
-        for j in range(10):
-            sublist = list()
-            for i in range(10):
-                sublist.append(random.randint(0, 1))
-            mines.append(sublist)
-            sublist = []
+        self.header = header
+        self.first_selection = True
+        self.game_end = False
 
 
-        self.grid_count = 10
-
-        for i in range(self.grid_count):
-            for j in range(self.grid_count):
-                self.btn = AnimatedHoverButton(mines[i][j], i, j, self.update_flags, self.start_game, self.end_game, self.grid)
-                self.grid.addWidget(self.btn, i, j, 1, 1)
-
-        self.setLayout(self.grid)
-        self.setStyleSheet("border: 1px solid gray;")
-
-    def mousePressEvent(self, e):
-        print("hello")
+    def uncover_all(self):
+        for i, space in enumerate(self.children()):
+            if not i:
+                continue
+            else:
+                space.uncover_end()
+        self.game_end = True

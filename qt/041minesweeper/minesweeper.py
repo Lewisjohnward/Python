@@ -1,81 +1,85 @@
-"""
-    Minesweeper game in a dialog widget
-    To do:
-        Add random start
-        Reduce number of mines
-        Put grid in its own class
-        Win game ending
-        Add animation to uncovering safe spots
-"""
-
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 
-from header import Header
-from grid import Grid
-
 import sys
+from header import *
+from grid import *
 
+##### UI #######################
 
-
-class Dialog(QDialog):
+class MenuBar(QMenuBar):
     def __init__(self):
         super().__init__()
+        self.setProperty("class", "menubar")
+        gameMenu = self.addMenu("&Game")
+        self.addMenu("&Help")
 
-        self.started = False
-        self.dead = False
-        self.won = False
+        tempAction = QAction("&Exit", self)
+        gameMenu.addAction(tempAction)
 
-        self.initUI()
 
-    def initUI(self):
-        self.resize(400, 400)
-        vert_layout = QVBoxLayout()
-        # Header
+class MainWindowUI(QDialog):
+    def __init__(self):
+        super().__init__()
+        f = open("./styles.qss")
+        styles = f.read()
+
         self.header = Header(self.restart_game)
+        self.grid = Grid(self.header)
 
-        grid = Grid(self.header.update_flags, self.start_game, self.end_game)
+        self.menu = MenuBar()
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.header.increment_counter)
+        self.vl = QVBoxLayout()
+        self.vl.setSpacing(0)
+        self.vl.setContentsMargins(0, 0, 0, 0)
 
-        vert_layout.addLayout(self.header)
-        vert_layout.addWidget(grid, 2)
+        self.vlayout = QVBoxLayout()
+        self.vlayout.setContentsMargins(0, 0, 0, 0)
+        self.vlayout.setSpacing(0)
+        self.vl.addWidget(self.menu)
+        self.vlayout.addWidget(self.header)
+        self.vlayout.addWidget(self.grid)
+        self.frame = QFrame()
+        self.frame.setProperty("class", "mainframe")
+        self.frame.setLayout(self.vlayout)
+        self.vl.addWidget(self.frame)
+        self.setProperty("class", "dialogBorder")
+        self.setStyleSheet(styles)
 
+        self.resize(500, 500)
+        self.setLayout(self.vl)
 
-        self.setLayout(vert_layout)
         self.show()
 
-    def end_game(self, dead):
-        self.timer.stop()
-        self.header.end_game(dead)
+################# Logic ###
+
+class MainWindow(MainWindowUI):
+    def __init__(self):
+        super().__init__()
+        self.recreate_grid = False
+
+    # Deletes the grid and redraws it
+    def restart_game(self):
+        if self.recreate_grid:
+            self.grid.deleteLater()
+            self.grid = Grid(self.header)
+            self.vlayout.addWidget(self.grid)
+            self.header.timer.reset_timer()
+            self.recreate_grid = False
+            self.header.flags.reset_flags()
+        else:
+            self.header.timer.stop_timer()
+            self.grid.uncover_all()
+            self.recreate_grid = True
 
     def start_game(self):
-        if self.started == False:
-            print("starting game")
-            self.started = True
-            self.increment_time()
-
-    def increment_time(self):
-        if self.started == True:
-            self.header.increment_counter()
-            self.timer.start(1000)
-        if self.started == False:
-            self.timer.stop()
-
-    def restart_game(self):
-        self.header.restart()
-        self.btn.restart()
-        self.timer.stop()
-        self.started = False
-
+        self.header.timer.start_timer()
 
 def main():
-    app = QApplication([])
-    w = Dialog()
-    sys.exit(app.exec())
+    a = QApplication(sys.argv)
+    w = MainWindow()
+    sys.exit(a.exec())
 
 if __name__ == "__main__":
     main()
-
