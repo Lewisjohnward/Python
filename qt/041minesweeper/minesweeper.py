@@ -2,6 +2,7 @@
     Minesweeper
     python3 minesweeper.py
 """
+
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
@@ -11,6 +12,24 @@ from header import *
 from grid import *
 
 ##### UI #######################
+
+class EndgameDialogUI(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("HELLO!")
+
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.layout = QVBoxLayout()
+        message = QLabel("Congratulations you have finished the game")
+        self.layout.addWidget(message)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
+
 
 class MenuBar(QMenuBar):
     def __init__(self):
@@ -54,9 +73,14 @@ class MainWindowUI(QDialog):
         self.resize(500, 500)
         self.setLayout(self.vl)
 
+
         self.show()
 
 ################# Logic ###
+
+class EndgameDialog(EndgameDialogUI):
+    def __init__(self):
+        super().__init__()
 
 class MainWindow(MainWindowUI):
     def __init__(self):
@@ -79,6 +103,14 @@ class MainWindow(MainWindowUI):
 
     def start_game(self):
         self.header.timer.start_timer()
+
+    def won_game(self):
+        self.header.timer.stop_timer()
+        dlg = EndgameDialog()
+        dlg.exec()
+        self.recreate_grid = True
+        self.restart_game()
+
 
 def main():
     a = QApplication(sys.argv)

@@ -102,6 +102,19 @@ class AnimatedHoverButton(AnimatedHoverButtonUI):
         else:
             self.uncover()
 
+
+        if self.uncovered_all_spaces():
+            self.parent().parent().parent().won_game()
+
+    def uncovered_all_spaces(self):
+        for i, btn in enumerate(self.parent().children()):
+            if i == 0:
+                continue
+            if not btn.mine and not btn.uncovered:
+                return False
+        return True
+
+
     def refresh_style(self):
         self.setCursor(QCursor(Qt.ArrowCursor))
         self.style().unpolish(self)
