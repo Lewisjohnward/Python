@@ -8,5 +8,6 @@ Minesweeper created with PySide6
 ## To Do
 - [x] - Color uncovered spaces
 - [x] - Create endgame logic
+- [ ] - Add variable number of rows/cols
 - [ ] - Add menu to choose difficulty
 - [ ] - Style endgame dialog
