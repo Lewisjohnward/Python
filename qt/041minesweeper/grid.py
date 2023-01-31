@@ -180,7 +180,6 @@ class AnimatedHoverButton(AnimatedHoverButtonUI):
                 "#080808"
                 ]
 
-
         i = 0
         try:
             i = int(touching)
