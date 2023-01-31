@@ -1,0 +1,60 @@
+QDialog, .btn{
+    background: #cbccca;
+}
+
+QMenuBar{
+        background: white;
+        padding: 5px 0px;
+}
+
+.header {
+    margin-bottom: 10px;
+}
+
+.mainframe{
+    padding: 5px;
+    border-top: 4px solid white;
+    border-left: 4px solid white;
+    border-bottom: 4px solid darkgray;
+    border-right: 4px solid darkgray;
+}
+
+.border{
+    border-top: 4px solid darkgray;
+    border-right: 4px solid white;
+    border-bottom: 4px solid white;
+    border-left: 4px solid darkgray;
+}
+
+.inverseBorder{
+    border-top: 3px solid white;
+    border-right: 3px solid darkgray;
+    border-bottom: 3px solid darkgray;
+    border-left: 3px solid white;
+}
+
+.lcd{
+    color: red;
+}
+
+.btn:hover{
+    background: darkgray;
+}
+
+.frame{
+    padding: 0;
+}
+
+.uncoveredSafe{
+    background: darkgray;
+    border-radius: 0;
+    border: 1px solid #cbccca;
+    font-weight: 900;
+}
+
+.uncoveredBomb{
+    background: red;
+    border-radius: 0;
+    border: 1px solid red;
+}
+
