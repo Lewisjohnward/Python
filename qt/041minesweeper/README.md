@@ -1,6 +1,8 @@
 # Minesweeper
 
-''' python3 minesweeper.py '''
+```
+python3 minesweeper.py
+```
 
 Minesweeper created with PySide6
 
