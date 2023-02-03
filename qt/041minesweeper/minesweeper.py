@@ -96,10 +96,12 @@ class MainWindow(MainWindowUI):
             self.header.timer.reset_timer()
             self.recreate_grid = False
             self.header.flags.reset_flags()
+            self.header.reset_smiley()
         else:
             self.header.timer.stop_timer()
             self.grid.uncover_all()
             self.recreate_grid = True
+            self.header.uncovered_mine()
 
     def start_game(self):
         self.header.timer.start_timer()

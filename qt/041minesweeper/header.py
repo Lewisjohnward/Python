@@ -103,4 +103,10 @@ class Header(HeaderUI):
         self.restart_game = restart_game
         self.smiley.clicked.connect(self.restart_game)
 
+    def uncovered_mine(self):
+        self.smiley.setIcon(QIcon("./icons/sad.png"))
+
+    def reset_smiley(self):
+        self.smiley.setIcon(QIcon("./icons/happiness.png"))
+
 

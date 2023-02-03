@@ -102,7 +102,6 @@ class AnimatedHoverButton(AnimatedHoverButtonUI):
         else:
             self.uncover()
 
-
         if self.uncovered_all_spaces():
             self.parent().parent().parent().won_game()
 
@@ -131,6 +130,7 @@ class AnimatedHoverButton(AnimatedHoverButtonUI):
         if self.mine:
             ### END GAME LOGIC HERE
             self.setProperty("class", "uncoveredBomb")
+            self.setIcon(QIcon("./icons/bomb.png"))
             self.refresh_style()
         else:
             self.setProperty("class", "uncoveredSafe")
