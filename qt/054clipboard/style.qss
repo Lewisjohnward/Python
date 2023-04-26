@@ -1,0 +1,116 @@
+QMainWindow{
+    background: white;
+}
+
+/* Header */
+
+.header {
+    background: #ededed;
+    padding: 5px;
+}
+
+.header_filter_button{
+    padding: 8px;
+    margin: 0px;
+    background: #d2d4d3;
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: bold;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 1px;
+}
+
+.header_filter_button::hover{
+    background: #66d18e;
+}
+
+.header_searchbar{
+    background: white;
+    padding: 0px 10px 0px 10px;
+}
+
+.header_searchbar_line_edit{
+    border: 0;
+    color: rgba(0, 0, 0, 0.3);
+    font-size: 14px;
+}
+
+.header_searchbar_search_icon{
+    background: white;
+    border: 0;
+}
+
+
+/* Subheader */
+
+.subheader {
+    border-top: 1px solid rgba(192, 199, 189, 0.8);
+    border-bottom: 1px solid rgba(192, 199, 189, 0.8);
+    margin: 0px;
+    padding: 5px 25px 5px 10px;
+    background: white;
+}
+
+.subheader * {
+    color: rgba(0, 0, 0, 0.4);
+    font-weight: bold;
+}
+.subheader_button {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 8px;
+    margin: 0px;
+    border-radius: 1px;
+}
+
+.subheader_total_items {
+    border: 0;
+}
+
+.subheader_button:hover{
+    background: rgba(150, 150, 150, 0.3);
+}
+
+
+/* scrollarea */
+.scrollarea {
+    background: white;
+}
+
+/* clipping */
+
+.clipping_container{
+    padding: 5px 10px 5px 0px;
+    border-top: 0px solid rgba(192, 199, 189, 0.8); 
+    border-bottom: 1px solid rgba(192, 199, 189, 0.8);
+}
+
+.clipping_container > *{
+    font-size: 12px;
+    font-family: Freesans;
+}
+
+.clipping_time_bbl{
+    margin-left: 8px;
+    padding: 10px;
+    background: rgba(120, 120, 120, 0.2);
+    border-radius: 2px;
+}
+
+.clipping_text{
+    font-size: 18px;
+}
+
+.clipping_btn_container > *{
+    padding: 8px;
+    background: white;
+    border: 1px solid rgba(192, 199, 189, 0.8);
+    border-radius: 1px;
+}
+
+.star_btn.selected{
+    background: rgba(247, 237, 37, 1);
+}
+
+.star_btn::hover{
+    background: rgba(247, 237, 37, 1);
+    opacity: 1;
+}
